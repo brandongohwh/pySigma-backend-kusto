@@ -36,6 +36,7 @@ from .transformations import (
     ParentImageValueTransformation,
     SplitDomainUserTransformation,
     XDRHashesValuesTransformation,
+    RegistryValueTransformation,
 )
 
 MICROSOFT_XDR_SCHEMA = create_schema(MicrosoftXDRSchema, MICROSOFT_XDR_TABLES)
@@ -113,6 +114,11 @@ def _create_replacement_items():
             identifier="microsoft_xdr_registry_actiontype_value",
             transformation=RegistryActionTypeValueTransformation(),
             field_name_conditions=[IncludeFieldCondition(["ActionType"])],
+        ),
+        ProcessingItem(
+            identifier="microsoft_xdr_registry_value_replace_qword_dword",
+            transformation=RegistryValueTransformation(),
+            field_name_conditions=[IncludeFieldCondition(["RegistryValueData"])],
         ),
         # Extract Domain from Username fields
         ProcessingItem(

@@ -2,7 +2,7 @@ from typing import Iterable, Optional, Union
 
 from sigma.processing.transformations.base import DetectionItemTransformation, ValueTransformation
 from sigma.rule import SigmaDetection, SigmaDetectionItem
-from sigma.types import SigmaString, SigmaType
+from sigma.types import SigmaString, SigmaType, SigmaNumber
 
 from ..kusto_common.transformations import BaseHashesValuesTransformation
 
@@ -81,3 +81,14 @@ class XDRHashesValuesTransformation(BaseHashesValuesTransformation):
 
     def __init__(self):
         super().__init__(valid_hash_algos=["MD5", "SHA1", "SHA256"], field_prefix="")
+
+class RegistryValueTransformation(ValueTransformation):
+    """
+    Transforms RegistryValue into its respective decimal value when DWORD or QWORD is present in the value.
+    """
+    
+    def apply_value(self, field: str, val: SigmaType) -> Optional[Union[SigmaType, Iterable[SigmaType]]]:
+        if "DWORD" in val.to_plain() or "QWORD" in val.to_plain():
+            registry_base_16_string = str(val.to_plain().split("(")[1].split(")")[0])
+            registry_base_10_value = int(registry_base_16_string, 16)
+            return SigmaNumber(registry_base_10_value)
