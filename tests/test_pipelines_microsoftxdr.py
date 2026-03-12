@@ -565,7 +565,29 @@ def test_microsoft_xdr_pipeline_registry_actiontype_replacements(xdr_backend):
 
     assert xdr_backend.convert(SigmaCollection.from_yaml(yaml_rule)) == expected_result
     assert xdr_backend.convert_rule(SigmaRule.from_yaml(yaml_rule)) == expected_result
-
+    
+def test_microsoft_xdr_pipeline_registry_value_replacements(xdr_backend):
+    yaml_rule = """
+        title: Test
+        status: test
+        logsource:
+            category: registry_event
+            product: windows
+        detection:
+            sel1:
+                Details: DWORD (0x00000d3d)
+            sel2:
+                Details: QWORD (0x00000100)
+            condition: any of sel*
+    """
+    
+    expected_result = [
+        "DeviceRegistryEvents\n| "
+        'where RegistryValueData in~ ("3389", "256")'
+    ]
+    
+    assert xdr_backend.convert(SigmaCollection.from_yaml(yaml_rule)) == expected_result
+    assert xdr_backend.convert_rule(SigmaRule.from_yaml(yaml_rule)) == expected_result
 
 def test_microsoft_xdr_pipeline_valid_hash_in_list(xdr_backend):
     yaml_rule = """
